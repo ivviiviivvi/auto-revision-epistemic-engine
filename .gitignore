@@ -35,3 +35,9 @@ htmlcov/
 *.swp
 *.swo
 *~
+
+# Example output directories
+example_audit_logs/
+example_state_snapshots/
+audit_logs/
+state_snapshots/
