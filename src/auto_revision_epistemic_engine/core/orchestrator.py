@@ -3,7 +3,7 @@ Core Orchestrator that coordinates all components
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field
 
 from ..phases.phase_manager import PhaseManager, PhaseName, PhaseStatus
