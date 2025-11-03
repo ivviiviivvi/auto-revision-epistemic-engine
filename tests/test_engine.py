@@ -2,7 +2,6 @@
 Tests for the Auto-Revision Epistemic Engine
 """
 
-import pytest
 from auto_revision_epistemic_engine import AutoRevisionEngine
 
 
