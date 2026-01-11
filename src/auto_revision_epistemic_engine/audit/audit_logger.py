@@ -174,8 +174,15 @@ class AuditLogger:
         attestation.hash = hasher.hexdigest()
 
         # Append to attestations file
-        with open(self.attestation_file, "a") as f:
-            f.write(attestation.model_dump_json() + "\n")
+        with self._lock:
+            try:
+                with open(self.attestation_file, "a") as f:
+                    f.write(attestation.model_dump_json() + "\n")
+                    f.flush()
+                    os.fsync(f.fileno())
+            except IOError as e:
+                # Propagate as a runtime error to signal critical failure
+                raise RuntimeError(f"Failed to write attestation log: {e}")
 
         # Also log as audit event
         self.log_event(
