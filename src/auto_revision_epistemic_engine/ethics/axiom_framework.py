@@ -242,7 +242,7 @@ class AxiomFramework:
                 return "No actor identified for action"
         
         elif axiom.category == AxiomCategory.TRANSPARENCY:
-            if "rationale" not in context or not context.get("rationale"):
+            if not context.get("rationale"):
                 return "No rationale provided for decision"
         
         elif axiom.category == AxiomCategory.PRIVACY:
