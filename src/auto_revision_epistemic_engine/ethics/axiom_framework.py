@@ -2,7 +2,7 @@
 Axiom Framework for ethics and reflexivity with normative audits and meta-commentary
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
@@ -32,7 +32,7 @@ class Axiom(BaseModel):
 class NormativeAudit(BaseModel):
     """Normative audit result"""
     audit_id: str
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     phase: str
     axioms_evaluated: List[str]
     violations: List[Dict[str, Any]] = Field(default_factory=list)
@@ -44,7 +44,7 @@ class NormativeAudit(BaseModel):
 class MetaCommentary(BaseModel):
     """Meta-commentary on system behavior"""
     commentary_id: str
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     context: str
     observation: str
     implications: List[str] = Field(default_factory=list)
@@ -169,7 +169,7 @@ class AxiomFramework:
         Returns:
             NormativeAudit: Audit results
         """
-        audit_id = f"AUDIT_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+        audit_id = f"AUDIT_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')}"
         
         # Select axioms to evaluate
         if axiom_ids:
@@ -279,7 +279,7 @@ class AxiomFramework:
         Returns:
             MetaCommentary: The created meta-commentary
         """
-        commentary_id = f"META_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+        commentary_id = f"META_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')}"
         
         commentary = MetaCommentary(
             commentary_id=commentary_id,

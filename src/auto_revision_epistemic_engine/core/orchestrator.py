@@ -2,12 +2,12 @@
 Core Orchestrator that coordinates all components
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from ..phases.phase_manager import PhaseManager, PhaseName, PhaseStatus
-from ..hrg.human_review_gate import HumanReviewGate, ReviewStatus
+from ..phases.phase_manager import PhaseManager, PhaseName
+from ..hrg.human_review_gate import HumanReviewGate
 from ..rol_t.resource_optimizer import ResourceOptimizationLayer, ResourceType
 from ..reproducibility.state_manager import StateManager
 from ..ethics.axiom_framework import AxiomFramework
@@ -230,7 +230,7 @@ class Orchestrator:
                 data={
                     "inputs": inputs,
                     "outputs": outputs,
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 },
             )
             
@@ -319,7 +319,7 @@ class Orchestrator:
         outputs = {
             "phase": phase.value,
             "processed": True,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "data": inputs.get("data", {}),
         }
         
@@ -374,9 +374,8 @@ class Orchestrator:
         # Find allocations for this phase and record usage
         for allocation_id, allocation in self.rol_t.allocations.items():
             if allocation.phase == phase.value:
-                # Simulate usage (80-95% of allocated)
-                import random
-                usage_factor = 0.80 + random.random() * 0.15
+                # Simulate usage (80-95% of allocated) using seeded random for reproducibility
+                usage_factor = 0.80 + self.state_manager.get_random() * 0.15
                 amount_used = allocation.amount_allocated * usage_factor
                 
                 self.rol_t.record_usage(

@@ -4,7 +4,7 @@ State Manager for reproducibility with pinned models, seeds, and immutable state
 
 import json
 import random
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field
@@ -16,13 +16,13 @@ class ReproducibilityConfig(BaseModel):
     random_seed: int
     model_pins: Dict[str, str] = Field(default_factory=dict)
     environment_snapshot: Dict[str, Any] = Field(default_factory=dict)
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 class ImmutableState(BaseModel):
     """Immutable state snapshot"""
     state_id: str
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     phase: str
     data: Dict[str, Any]
     config_hash: str
@@ -74,7 +74,7 @@ class StateManager:
 
     def _generate_seed(self) -> int:
         """Generate a reproducible seed based on timestamp"""
-        return int(datetime.utcnow().timestamp() * 1000000) % (2**32)
+        return int(datetime.now(timezone.utc).timestamp() * 1000000) % (2**32)
 
     def _save_config(self):
         """Save reproducibility configuration"""
@@ -198,6 +198,15 @@ class StateManager:
             "timestamp": self.config.timestamp,
             "snapshots_count": len(self._states),
         }
+
+    def get_random(self) -> float:
+        """
+        Get a random float from the seeded random generator for reproducibility.
+        
+        Returns:
+            float: Random value between 0 and 1
+        """
+        return random.random()
 
     def load_config(self, config_path: str) -> bool:
         """

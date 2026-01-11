@@ -6,7 +6,7 @@ import blake3
 import json
 import os
 import threading
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 
 class AuditEntry(BaseModel):
     """Single audit log entry"""
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     event_type: str
     phase: Optional[str] = None
     actor: str
@@ -41,7 +41,7 @@ class AuditEntry(BaseModel):
 class ComplianceAttestation(BaseModel):
     """Compliance attestation record"""
     attestation_id: str
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     attestation_type: str
     attester: str
     scope: str
@@ -157,7 +157,7 @@ class AuditLogger:
             ComplianceAttestation: The created attestation
         """
         attestation_id = blake3.blake3(
-            f"{attestation_type}_{attester}_{datetime.utcnow().isoformat()}".encode()
+            f"{attestation_type}_{attester}_{datetime.now(timezone.utc).isoformat()}".encode()
         ).hexdigest()[:16]
 
         attestation = ComplianceAttestation(

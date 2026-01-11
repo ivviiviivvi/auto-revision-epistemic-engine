@@ -2,7 +2,7 @@
 Human Review Gates (HRG) with clear SLAs and escalation mechanisms
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
@@ -39,7 +39,7 @@ class HRGReview(BaseModel):
     review_id: str
     gate_name: str
     phase: str
-    created_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     status: ReviewStatus = ReviewStatus.PENDING
     assigned_to: Optional[str] = None
     reviewer: Optional[str] = None
@@ -57,7 +57,7 @@ class EscalationEvent(BaseModel):
     """Escalation event record"""
     event_id: str
     review_id: str
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     from_level: EscalationLevel
     to_level: EscalationLevel
     reason: str
@@ -131,7 +131,7 @@ class HumanReviewGate:
         Returns:
             HRGReview: The created review request
         """
-        review_id = f"HRG_{gate_name}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+        review_id = f"HRG_{gate_name}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')}"
         
         review = HRGReview(
             review_id=review_id,
@@ -166,7 +166,7 @@ class HumanReviewGate:
         
         review.status = ReviewStatus.IN_PROGRESS
         review.reviewer = reviewer
-        review.responded_at = datetime.utcnow().isoformat()
+        review.responded_at = datetime.now(timezone.utc).isoformat()
         
         return True
 
@@ -200,7 +200,7 @@ class HumanReviewGate:
         
         review.decision = decision.upper()
         review.rationale = rationale
-        review.resolved_at = datetime.utcnow().isoformat()
+        review.resolved_at = datetime.now(timezone.utc).isoformat()
         
         if review.decision == "APPROVE":
             review.status = ReviewStatus.APPROVED
@@ -234,7 +234,7 @@ class HumanReviewGate:
         review = self.reviews[review_id]
         from_level = review.escalation_level
         
-        event_id = f"ESC_{review_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+        event_id = f"ESC_{review_id}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')}"
         
         escalation = EscalationEvent(
             event_id=event_id,
@@ -261,7 +261,7 @@ class HumanReviewGate:
             List of SLA violations
         """
         violations = []
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         
         for review in self.reviews.values():
             if review.status in [ReviewStatus.PENDING, ReviewStatus.IN_PROGRESS]:
@@ -346,6 +346,7 @@ class HumanReviewGate:
             if current_idx < len(levels) - 1:
                 return levels[current_idx + 1]
         except ValueError:
+            # Current level not found in standard escalation path, escalate to CRITICAL as safe fallback
             pass
         
         return EscalationLevel.CRITICAL

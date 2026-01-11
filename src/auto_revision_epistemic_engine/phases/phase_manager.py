@@ -2,7 +2,7 @@
 Phase Manager for the 8-phase orchestration pipeline
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
@@ -128,13 +128,13 @@ class PhaseManager:
         Returns:
             PhaseExecution: The phase execution record
         """
-        execution_id = f"{phase.value}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+        execution_id = f"{phase.value}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')}"
         
         execution = PhaseExecution(
             execution_id=execution_id,
             phase=phase,
             status=PhaseStatus.RUNNING,
-            started_at=datetime.utcnow().isoformat(),
+            started_at=datetime.now(timezone.utc).isoformat(),
             inputs=inputs or {},
         )
         
@@ -169,7 +169,7 @@ class PhaseManager:
             return False
         
         execution.status = PhaseStatus.COMPLETED
-        execution.completed_at = datetime.utcnow().isoformat()
+        execution.completed_at = datetime.now(timezone.utc).isoformat()
         
         if outputs:
             execution.outputs = outputs
@@ -206,7 +206,7 @@ class PhaseManager:
         execution = self.executions[execution_id]
         
         execution.status = PhaseStatus.FAILED
-        execution.completed_at = datetime.utcnow().isoformat()
+        execution.completed_at = datetime.now(timezone.utc).isoformat()
         execution.error = error
         
         # Calculate duration

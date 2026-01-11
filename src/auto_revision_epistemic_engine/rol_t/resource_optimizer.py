@@ -3,7 +3,7 @@ Resource Optimization Layer-Tracking (ROL-T) for utilization tracking and waste 
 """
 
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 from enum import Enum
@@ -22,7 +22,7 @@ class ResourceType(str, Enum):
 class ResourceAllocation(BaseModel):
     """Resource allocation record"""
     allocation_id: str
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     resource_type: ResourceType
     phase: str
     amount_requested: float
@@ -35,7 +35,7 @@ class ResourceUsage(BaseModel):
     """Resource usage record"""
     usage_id: str
     allocation_id: str
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     resource_type: ResourceType
     phase: str
     amount_used: float
@@ -47,7 +47,7 @@ class ResourceUsage(BaseModel):
 class WasteGovernance(BaseModel):
     """Waste governance assessment"""
     assessment_id: str
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     time_period: str
     total_waste: Dict[str, float] = Field(default_factory=dict)
     waste_threshold_breaches: List[str] = Field(default_factory=list)
@@ -109,7 +109,7 @@ class ResourceOptimizationLayer:
             ResourceAllocation: The allocation record
         """
         with self._lock:  # Thread-safe allocation
-            allocation_id = f"ALLOC_{resource_type}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+            allocation_id = f"ALLOC_{resource_type}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')}"
             
             # Apply optimization logic
             amount_allocated = self._optimize_allocation(
@@ -180,7 +180,7 @@ class ResourceOptimizationLayer:
                 raise ValueError(f"Allocation {allocation_id} not found")
             
             allocation = self.allocations[allocation_id]
-            usage_id = f"USAGE_{allocation_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+            usage_id = f"USAGE_{allocation_id}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')}"
             
             # Calculate waste
             amount_wasted = max(0, allocation.amount_allocated - amount_used)
@@ -194,8 +194,9 @@ class ResourceOptimizationLayer:
             
             # Detect over-allocation (usage exceeds allocation)
             if amount_used > allocation.amount_allocated:
-                # Log warning but allow it (efficiency will be capped at 1.0)
-                pass  # In production, this would trigger an alert
+                # Over-allocation detected - usage exceeds allocation
+                # This indicates resource planning issues and should be monitored
+                pass  # TODO: Add logging/alerting mechanism for over-allocation
             
             usage = ResourceUsage(
                 usage_id=usage_id,
@@ -228,7 +229,7 @@ class ResourceOptimizationLayer:
         Returns:
             WasteGovernance: Waste governance assessment
         """
-        assessment_id = f"WASTE_ASSESS_{datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+        assessment_id = f"WASTE_ASSESS_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S_%f')}"
         
         # Filter usages by time period if specified
         usages = self.usages
