@@ -158,7 +158,7 @@ class AuditLogger:
         """
         attestation_id = blake3.blake3(
             f"{attestation_type}_{attester}_{datetime.now(timezone.utc).isoformat()}".encode()
-        ).hexdigest()[:16]
+        ).hexdigest()[:32]  # Use 128 bits for collision resistance
 
         attestation = ComplianceAttestation(
             attestation_id=attestation_id,
