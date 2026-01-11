@@ -86,7 +86,7 @@ class AuditLogger:
                                         self._last_hash = entry.entry_hash
                                         break
                                     # Hash mismatch, continue to previous entry
-                            except (json.JSONDecodeError, Exception):
+                            except (json.JSONDecodeError, ValueError, KeyError, TypeError):
                                 continue  # Skip corrupted or invalid line
             except IOError as e:
                 # Log file exists but cannot be read - critical error
