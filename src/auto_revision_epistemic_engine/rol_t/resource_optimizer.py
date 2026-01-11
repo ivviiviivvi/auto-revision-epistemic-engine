@@ -254,7 +254,7 @@ class ResourceOptimizationLayer:
         # Check for threshold breaches
         breaches = []
         for resource_type, threshold in self.waste_thresholds.items():
-            rt = resource_type.value
+            rt = resource_type  # Already a string from .value keys
             if rt in total_waste and rt in total_allocated:
                 waste_percentage = (
                     total_waste[rt] / total_allocated[rt]
