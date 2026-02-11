@@ -346,7 +346,7 @@ python -m pytest tests/ -v --cov=auto_revision_engine
 
 ### Within ORGAN-I (Theory)
 
-- **[recursive-engine](https://github.com/organvm-i-theoria/recursive-engine)** — Recursive self-modeling framework; shares ARE's commitment to systems that observe and constrain their own behavior. ARE operationalizes governance; recursive-engine operationalizes self-reference.
+- **[recursive-engine](https://github.com/organvm-i-theoria/recursive-engine--generative-entity)** — Recursive self-modeling framework; shares ARE's commitment to systems that observe and constrain their own behavior. ARE operationalizes governance; recursive-engine operationalizes self-reference.
 - **ontological-commit-engine** — Ontological commitment tracking; complementary to ARE's axiom framework (axioms are ontological commitments with enforcement levels).
 
 ### Across Organs
