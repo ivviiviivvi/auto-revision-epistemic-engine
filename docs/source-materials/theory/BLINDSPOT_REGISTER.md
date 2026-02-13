@@ -1,0 +1,2 @@
+# BLINDSPOT_REGISTER
+Known limits.
